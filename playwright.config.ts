@@ -20,11 +20,14 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // Every test gets a recording, shown on its page in the HTML report.
+    video: { mode: 'on', size: { width: 1440, height: 900 } },
     proxy,
     launchOptions: executablePath ? { executablePath } : {},
   },
   projects: [
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    // Sign-in is not a test result, so it is not recorded.
+    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { video: 'off' } },
     {
       name: 'chromium',
       testIgnore: /auth\.setup\.ts/,

@@ -105,6 +105,9 @@ npm test
 npm run report
 ```
 
+The report opens in the browser. Every test is recorded, so each test's page in the
+report has a video of the run to play back, plus a screenshot and trace if it failed.
+
 ```bash
 npm run check
 ```

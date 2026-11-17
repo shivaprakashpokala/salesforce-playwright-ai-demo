@@ -80,6 +80,8 @@ npm test
 npm run report
 ```
 
+Open any test in the report and play its video to show the run.
+
 ## If the live generation stalls
 
 ```bash
