@@ -42,6 +42,27 @@ export class CaseRecordPage {
     await this.saveButton.click();
   }
 
+  /** The case feed, shown on the Feed tab. */
+  get feed(): Locator {
+    return this.page.getByRole('region', { name: 'Feed', exact: true });
+  }
+
+  /**
+   * The "Case status updated" post Salesforce writes in the feed when Status changes.
+   * Its body reads "Status / <from> to <to>"; the label and values are separate elements,
+   * so match the post by its title and the "<from> to <to>" text.
+   */
+  statusChangeInFeed(from: string, to: string): Locator {
+    return this.feed
+      .getByRole('article')
+      .filter({ hasText: 'Case status updated' })
+      .filter({ hasText: `${from} to ${to}` });
+  }
+
+  async openFeed() {
+    await this.page.getByRole('tab', { name: 'Feed', exact: true }).click();
+  }
+
   async delete() {
     await this.deleteButton.click();
     await this.confirmDeleteDialog.getByRole('button', { name: 'Delete', exact: true }).click();

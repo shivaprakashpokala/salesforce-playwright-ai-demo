@@ -1,91 +1,67 @@
-# Case lifecycle test plan
+# Salesforce Case lifecycle – demo scenarios
 
 ## Application Overview
 
-The Cases tab of a Salesforce Lightning org. A support agent creates a case from the New Case form (four sections: Case Information, Web Information, Additional Information, Description Information), then works it from the case record page. Business rules come from the case-domain skill: Case Origin is required, a new case defaults to Status New and Priority Medium, cancelling leaves nothing behind, escalation happens on the record page, and deleting asks for confirmation.
+Support agents create a Case for each customer problem and work it to resolution. The New Case form (Cases tab → New) has Status* (default New), Priority (default Medium), Case Origin* (Phone/Email/Web), Type, Subject and Description, among others. Business rules under test (case-domain skill): (1) a case cannot be saved without a Case Origin – Salesforce shows "We hit a snag." and names the field; (2) a new case starts as Status New and Priority Medium unless the agent says otherwise; (4) escalating (Status = Escalated) is done from the record page and is recorded in the case feed as a status change. Every test case has a Subject starting with "PW Demo" and is deleted after the test. Each save is verified on screen and through the Salesforce API.
 
 ## Test Scenarios
 
-### 1. Creating a case
+### 1. Case lifecycle
 
 **Seed:** `tests/seed.spec.ts`
 
-#### 1.1. Create a case with its key details
+#### 1.1. creates a case with its key details
 
-**File:** `tests/generated/create-a-case-with-its-key-details.spec.ts`
-
-**Steps:**
-  1. Select New on the Cases list
-    - expect: The New Case form opens
-  2. Choose Phone in Case Origin
-  3. Choose High in Priority
-  4. Choose Electrical in Type
-  5. Enter a unique subject starting with "PW Demo" in Subject
-  6. Enter "Generator will not start after the scheduled service." in Description
-  7. Select Save
-    - expect: A message says the case was created
-    - expect: The record page shows the subject as its heading
-    - expect: Status is New, Priority is High, Case Origin is Phone, Type is Electrical
-    - expect: The case has an eight-digit Case Number
-
-#### 1.2. Do not save a case without a Case Origin
-
-**File:** `tests/generated/do-not-save-a-case-without-a-case-origin.spec.ts`
+**File:** `tests/case-lifecycle.spec.ts`
 
 **Steps:**
-  1. Select New on the Cases list
-    - expect: The New Case form opens
-  2. Enter a unique subject in Subject and leave Case Origin as --None--
-  3. Select Save
-    - expect: A "We hit a snag." dialog appears
-    - expect: The dialog names Case Origin as the field to review
-    - expect: No case with that subject exists
+  1. Open the New Case form from the Cases tab
+    - expect: The "New Case" dialog is shown
+    - expect: Status shows "New" and Priority shows "Medium" (rule 2 defaults)
+    - expect: Case Origin shows "--None--"
+  2. Set Case Origin to "Phone", Priority to "High", Type to "Electrical"; enter a "PW Demo …" Subject and a realistic Description (a standby generator that will not start); leave Status as New
+    - expect: Each picklist shows the chosen value
+  3. Click "Save"
+    - expect: A toast reads 'Case "<8-digit number>" was created.'
+    - expect: The record page heading is the Subject
+    - expect: Details show Status New, Priority High, Case Origin Phone, Type Electrical
+  4. Query the case by Subject through the API
+    - expect: Exactly one case exists with that Subject
+    - expect: Status = New, Priority = High, Origin = Phone, Type = Electrical
+    - expect: CaseNumber is eight digits and matches the number in the toast
 
-#### 1.3. Do not save a case when the form is cancelled
+#### 1.2. does not save a case without a Case Origin
 
-**File:** `tests/generated/do-not-save-a-cancelled-case.spec.ts`
-
-**Steps:**
-  1. Select New on the Cases list
-    - expect: The New Case form opens
-  2. Choose Email in Case Origin and enter a unique subject
-  3. Select Cancel
-    - expect: The form closes
-    - expect: No case with that subject exists
-
-#### 1.4. New case defaults to Status New and Priority Medium
-
-**File:** `tests/generated/new-case-defaults.spec.ts`
+**File:** `tests/case-lifecycle.spec.ts`
 
 **Steps:**
-  1. Select New on the Cases list
-    - expect: Status shows New
-    - expect: Priority shows Medium
+  1. Open the New Case form
+    - expect: The "New Case" dialog is shown and Case Origin shows "--None--"
+  2. Enter a "PW Demo …" Subject and a Description; leave Case Origin as --None--
+    - expect: Subject is filled in
+  3. Click "Save"
+    - expect: The "We hit a snag." error dialog is shown (rule 1)
+    - expect: The dialog names the "Case Origin" field as needing attention
+    - expect: No created toast appears
+  4. Close the error dialog
+    - expect: The New Case form is still open with the entered Subject kept, so the agent loses no work
+  5. Query the case by Subject through the API
+    - expect: No case exists with that Subject
 
-### 2. Working a case
+#### 1.3. escalates a case from its record page
 
-**Seed:** `tests/seed.spec.ts`
-
-#### 2.1. Escalate a case from its record page
-
-**File:** `tests/generated/escalate-a-case.spec.ts`
-
-**Steps:**
-  1. Open a case that has Status New and Priority High
-    - expect: The record page shows the case subject as its heading
-  2. Select Edit Status, choose Escalated and select Save
-    - expect: Status shows Escalated on the Details tab
-    - expect: The case feed records the status change from New to Escalated
-
-#### 2.2. Delete a case
-
-**File:** `tests/generated/delete-a-case.spec.ts`
+**File:** `tests/case-lifecycle.spec.ts`
 
 **Steps:**
-  1. Open an existing case
-    - expect: The record page shows the case subject as its heading
-  2. Select Delete
-    - expect: A Delete Case dialog asks for confirmation
-  3. Select Delete in the dialog
-    - expect: A message says the case was deleted
-    - expect: The case no longer exists
+  1. Create a case through the API with a "PW Demo …" Subject, Origin "Phone" (Status New, Priority Medium by default)
+    - expect: The API returns the case Id; the case is Status New
+  2. Open the case record page
+    - expect: The heading is the Subject
+    - expect: Details show Status "New"
+  3. Edit Status in place on the Details tab, choose "Escalated" and Save
+    - expect: Details show Status "Escalated"
+  4. Check the case feed
+    - expect: The feed records the status change from New to Escalated (rule 4)
+  5. Query the case by Subject through the API
+    - expect: Status = Escalated
+    - expect: Priority and Origin are unchanged (Medium, Phone)
