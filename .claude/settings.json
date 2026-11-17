@@ -2,6 +2,7 @@
   "enableAllProjectMcpServers": true,
   "permissions": {
     "allow": [
+      "Bash(node .github/skills/write-salesforce-test/scripts/scaffold.mjs:*)",
       "Bash(npx playwright test:*)",
       "Bash(npm run check:*)",
       "mcp__playwright-test",

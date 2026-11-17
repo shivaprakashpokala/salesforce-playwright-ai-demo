@@ -6,7 +6,7 @@ built with the three things from the lunch & learn:
 | Building block | Where it is in this repo | What it did here |
 | --- | --- | --- |
 | **Playwright MCP server** | `.vscode/mcp.json`, `.mcp.json` | Opened the org in a real browser and read each page as a snapshot of labels and roles |
-| **Skills** | `.github/skills/` (copied to `.claude/skills/`) | `case-domain` holds the business context; `write-salesforce-test` holds how we write tests |
+| **Skills** | `.github/skills/` (copied to `.claude/skills/`) | `case-domain` holds the business context; `write-salesforce-test` holds how we write tests and our framework kit |
 | **Playwright agents** | `.github/agents/`, `.claude/agents/` | Planner wrote `specs/case-lifecycle-plan.md`; generator wrote `tests/generated/`; healer's `test_run` ran the suite |
 
 ## What is tested
@@ -26,22 +26,22 @@ Every test creates its own case (subject starts with "PW Demo") and deletes it a
 ## Repository map
 
 ```
+docs/case-user-story.md             the user story and acceptance criteria
+docs/skill-comparison/              the same request answered without and with a Skill
 specs/case-lifecycle-plan.md        the planner's test plan, in plain English
-tests/case-lifecycle.spec.ts        the three demo scenarios (deleted and regenerated in the demo)
-tests/case-more.spec.ts             two more scenarios
-prompts/generate-case-tests.md      the request that regenerates the plan and the tests
-scripts/demo.mjs                    demo:reset, demo:generate, demo:restore
-tests/generated/                    a test written by the generator from the plan
+tests/case-lifecycle.spec.ts        three tests (deleted and regenerated in the demo)
+tests/case-more.spec.ts             two more tests
+tests/generated/                    a test written with the generator's own tool
 tests/pages/                        page objects: New Case form, Case record page
-tests/support/lightning.ts          reliable picklist helper for Lightning
-tests/support/salesforce-auth.ts    JWT sign-in with jsforce, and the front door link
-tests/support/salesforce-api.ts     checks saved data and cleans up (jsforce)
+tests/support/                      sign-in (JWT), data checks, Lightning helper
 tests/auth.setup.ts                 signs in once and saves the session
-tests/seed.spec.ts                  starting point for the agents
-.github/skills/                     Skills: case-domain, write-salesforce-test, write-test-cases, write-bug-report
+.github/skills/                     Skills: case-domain, write-salesforce-test, write-test-cases
 .github/agents/                     Playwright planner, generator and healer
+.github/prompts/                    the saved request that regenerates everything
+.claude/                            the same Skills, agents and request for Claude Code
 .github/workflows/playwright.yml    GitHub Actions workflow
-DEMO-SCRIPT.md                      run sheet for a live demo
+scripts/demo.mjs                    demo:reset, demo:reset:all, demo:generate, demo:restore
+DEMO-SCRIPT.md                      run sheet and a one-sentence tour of every file
 ```
 
 ## Setup
@@ -116,15 +116,14 @@ npm run check
 
 ## Live demo: delete and regenerate
 
-```bash
-npm run demo:reset
-```
+| Command | What it does |
+| --- | --- |
+| `npm run demo:reset` | Deletes the plan and the three tests |
+| `npm run demo:reset:all` | Deletes all the test code: framework, page objects, tests, plan and config |
+| `/generate-case-tests` in your AI assistant | Puts the framework back from the Skill's kit, then the planner, generator and healer write the plan and tests |
+| `npm run demo:restore` | Puts the committed versions back |
 
-deletes the plan and `tests/case-lifecycle.spec.ts`. Then run the saved prompt
-`/generate-case-tests` in your AI assistant (or `npm run demo:generate` with the Claude
-Code command line installed) to have the planner, generator and healer write them
-again. `npm run demo:restore` puts the committed versions back. `DEMO-SCRIPT.md` has
-the full run sheet.
+`DEMO-SCRIPT.md` has the full run sheet.
 
 ## GitHub Actions
 

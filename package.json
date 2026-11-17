@@ -11,7 +11,8 @@
     "check": "node .github/skills/write-salesforce-test/scripts/check-conventions.mjs",
     "demo:reset": "node scripts/demo.mjs reset",
     "demo:generate": "node scripts/demo.mjs generate",
-    "demo:restore": "node scripts/demo.mjs restore"
+    "demo:restore": "node scripts/demo.mjs restore",
+    "demo:reset:all": "node scripts/demo.mjs reset-all"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

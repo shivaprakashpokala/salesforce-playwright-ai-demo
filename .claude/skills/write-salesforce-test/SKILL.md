@@ -7,6 +7,16 @@ description: Write or fix Playwright end-to-end tests for Salesforce Lightning t
 
 Follow these steps in order. Do not skip the last one.
 
+## 0. Make sure the framework is there
+Our framework is a small kit: `playwright.config.ts`, the sign-in setup
+(`tests/auth.setup.ts`), helpers in `tests/support/`, fixtures and page objects.
+If `playwright.config.ts` or `tests/auth.setup.ts` is missing, put the kit back with
+
+    node .github/skills/write-salesforce-test/scripts/scaffold.mjs
+
+and prove sign-in works with `npx playwright test tests/seed.spec.ts`. Never write
+these files from scratch, and never overwrite ones that exist.
+
 ## 1. Know the business first
 - Read the domain skill for the object under test (for cases: `case-domain`).
   Test the rules in it, not just what is visible on the page.
