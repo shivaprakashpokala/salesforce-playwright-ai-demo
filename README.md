@@ -119,7 +119,7 @@ npm run check
 | Command | What it does |
 | --- | --- |
 | `npm run demo:reset` | Deletes the plan and the three tests |
-| `npm run demo:reset:all` | Deletes all the test code: framework, page objects, tests, plan and config |
+| `npm run demo:reset:all` | Deletes all the test code: framework, page objects, tests, plan and config. Keeps `tests/case-more.spec.ts` and `tests/generated/`, which the generate step does not write |
 | `/generate-case-tests` in your AI assistant | Puts the framework back from the Skill's kit, then the planner, generator and healer write the plan and tests |
 | `npm run demo:restore` | Puts the committed versions back |
 
