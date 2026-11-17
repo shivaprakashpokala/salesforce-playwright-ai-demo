@@ -1,8 +1,8 @@
-# Salesforce Case lifecycle – demo scenarios
+# Case lifecycle test plan
 
 ## Application Overview
 
-Support agents create a Case for each customer problem and work it to resolution. The New Case form (Cases tab → New) has Status* (default New), Priority (default Medium), Case Origin* (Phone/Email/Web), Type, Subject and Description, among others. Business rules under test (case-domain skill): (1) a case cannot be saved without a Case Origin – Salesforce shows "We hit a snag." and names the field; (2) a new case starts as Status New and Priority Medium unless the agent says otherwise; (4) escalating (Status = Escalated) is done from the record page and is recorded in the case feed as a status change. Every test case has a Subject starting with "PW Demo" and is deleted after the test. Each save is verified on screen and through the Salesforce API.
+Salesforce Lightning Case object, from the user story in docs/case-user-story.md. A support agent logs a customer's problem as a case. Expected results come from the case-domain business rules: Case Origin is required (Phone, Email, Web); a new case starts as Status New / Priority Medium unless changed; a saved case shows a confirmation and gets an eight-digit Case Number; escalation (Status = Escalated) is done from the record page and is recorded in the case feed as a status change. Every case created has a Subject starting with "PW Demo" and is deleted after the test. Every save is checked on screen and through the Salesforce API.
 
 ## Test Scenarios
 
@@ -15,20 +15,20 @@ Support agents create a Case for each customer problem and work it to resolution
 **File:** `tests/case-lifecycle.spec.ts`
 
 **Steps:**
-  1. Open the New Case form from the Cases tab
-    - expect: The "New Case" dialog is shown
-    - expect: Status shows "New" and Priority shows "Medium" (rule 2 defaults)
-    - expect: Case Origin shows "--None--"
-  2. Set Case Origin to "Phone", Priority to "High", Type to "Electrical"; enter a "PW Demo …" Subject and a realistic Description (a standby generator that will not start); leave Status as New
+  1. Open the New Case form
+    - expect: The "New Case" form is shown
+    - expect: Status shows New and Priority shows Medium (business rule 2)
+    - expect: Case Origin shows --None--
+  2. Enter a Subject starting with "PW Demo", choose Case Origin Phone, Priority High, Type Electrical, and enter a realistic Description (a generator that will not start). Leave Status unchanged.
     - expect: Each picklist shows the chosen value
-  3. Click "Save"
-    - expect: A toast reads 'Case "<8-digit number>" was created.'
-    - expect: The record page heading is the Subject
-    - expect: Details show Status New, Priority High, Case Origin Phone, Type Electrical
+  3. Click Save
+    - expect: The confirmation 'Case "<number>" was created.' appears and the number is eight digits (AC 3)
+    - expect: The record page heading shows the Subject
+    - expect: The Details tab shows Status New, Priority High, Case Origin Phone, Type Electrical
   4. Query the case by Subject through the API
-    - expect: Exactly one case exists with that Subject
-    - expect: Status = New, Priority = High, Origin = Phone, Type = Electrical
-    - expect: CaseNumber is eight digits and matches the number in the toast
+    - expect: Exactly one case exists
+    - expect: Its CaseNumber is eight digits and matches the confirmation
+    - expect: Status New, Priority High, Origin Phone, Type Electrical
 
 #### 1.2. does not save a case without a Case Origin
 
@@ -36,32 +36,32 @@ Support agents create a Case for each customer problem and work it to resolution
 
 **Steps:**
   1. Open the New Case form
-    - expect: The "New Case" dialog is shown and Case Origin shows "--None--"
-  2. Enter a "PW Demo …" Subject and a Description; leave Case Origin as --None--
-    - expect: Subject is filled in
-  3. Click "Save"
-    - expect: The "We hit a snag." error dialog is shown (rule 1)
-    - expect: The dialog names the "Case Origin" field as needing attention
-    - expect: No created toast appears
+    - expect: The "New Case" form is shown with Case Origin --None--
+  2. Enter a Subject starting with "PW Demo" and leave Case Origin as --None--
+    - expect: Subject holds the entered text
+  3. Click Save
+    - expect: The "We hit a snag." error dialog appears (business rule 1)
+    - expect: The dialog names the Case Origin field
   4. Close the error dialog
-    - expect: The New Case form is still open with the entered Subject kept, so the agent loses no work
-  5. Query the case by Subject through the API
-    - expect: No case exists with that Subject
+    - expect: The New Case form is still open with the Subject kept
+    - expect: Case Origin is still --None--
+  5. Query cases by Subject through the API
+    - expect: No case was saved
 
 #### 1.3. escalates a case from its record page
 
 **File:** `tests/case-lifecycle.spec.ts`
 
 **Steps:**
-  1. Create a case through the API with a "PW Demo …" Subject, Origin "Phone" (Status New, Priority Medium by default)
-    - expect: The API returns the case Id; the case is Status New
+  1. Create a case through the API with a "PW Demo" Subject and Origin Web (setup, not the point of the test)
+    - expect: The case exists with Status New
   2. Open the case record page
-    - expect: The heading is the Subject
-    - expect: Details show Status "New"
-  3. Edit Status in place on the Details tab, choose "Escalated" and Save
-    - expect: Details show Status "Escalated"
-  4. Check the case feed
-    - expect: The feed records the status change from New to Escalated (rule 4)
-  5. Query the case by Subject through the API
-    - expect: Status = Escalated
-    - expect: Priority and Origin are unchanged (Medium, Phone)
+    - expect: The heading shows the Subject
+    - expect: The Status field shows New
+  3. Edit Status in place on the Details tab, choose Escalated and Save
+    - expect: The Status field shows Escalated
+  4. Open the Feed tab
+    - expect: A "Case status updated" post shows New to Escalated (business rule 4)
+  5. Query the case through the API
+    - expect: Status is Escalated
+    - expect: Origin is still Web and Priority still Medium
