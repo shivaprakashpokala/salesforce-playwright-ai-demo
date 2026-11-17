@@ -1,5 +1,4 @@
 // Helpers for the live demo.
-//   npm run demo:reset       delete the plan and the three generated tests
 //   npm run demo:reset:all   delete ALL the test code: framework, page objects, tests, plan, config
 //                            (except the hand-written specs in `kept`, which nothing regenerates)
 //   npm run demo:generate    have an AI agent put everything back (Skills + MCP + Playwright agents)
@@ -8,7 +7,6 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statS
 import { execFileSync, spawnSync } from 'node:child_process';
 import { dirname, join, relative } from 'node:path';
 
-const generated = ['specs/case-lifecycle-plan.md', 'tests/case-lifecycle.spec.ts'];
 const everything = ['specs/case-lifecycle-plan.md', 'tests', 'playwright.config.ts'];
 // Hand-written tests that no reset deletes: the generate prompt only writes the three in
 // tests/case-lifecycle.spec.ts, so anything deleted here would never come back.
@@ -27,10 +25,7 @@ const files = (dir) => readdirSync(dir).flatMap((name) => {
   return statSync(path).isDirectory() ? files(path) : [path];
 });
 
-if (mode === 'reset') {
-  remove(generated);
-  console.log('\nThe plan and the test script are gone. Next: npm run demo:generate');
-} else if (mode === 'reset-all') {
+if (mode === 'reset-all') {
   // Keep the Skill's kit in step with the framework as it is today, so what comes back is what was here.
   for (const template of files(kit)) {
     const live = relative(kit, template);
@@ -62,6 +57,6 @@ if (mode === 'reset') {
   const run = spawnSync('claude -p --permission-mode acceptEdits', { input: prompt, stdio: ['pipe', 'inherit', 'inherit'], shell: true });
   process.exit(run.status ?? 1);
 } else {
-  console.log('Usage: node scripts/demo.mjs reset | reset-all | generate | restore');
+  console.log('Usage: node scripts/demo.mjs reset-all | generate | restore');
   process.exit(1);
 }

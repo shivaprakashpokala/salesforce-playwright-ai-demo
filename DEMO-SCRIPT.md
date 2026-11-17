@@ -37,7 +37,6 @@ npm run demo:reset:all
 ```
 
 The `tests` folder, the plan and `playwright.config.ts` are gone. Show the file explorer.
-(For a shorter demo use `npm run demo:reset`, which removes only the plan and the three tests.)
 
 **3. Show what the AI is given (2 min)**
 

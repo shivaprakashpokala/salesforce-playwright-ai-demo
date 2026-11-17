@@ -9,7 +9,6 @@
     "test:headed": "playwright test --headed",
     "report": "playwright show-report",
     "check": "node .github/skills/write-salesforce-test/scripts/check-conventions.mjs",
-    "demo:reset": "node scripts/demo.mjs reset",
     "demo:generate": "node scripts/demo.mjs generate",
     "demo:restore": "node scripts/demo.mjs restore",
     "demo:reset:all": "node scripts/demo.mjs reset-all"

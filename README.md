@@ -40,7 +40,7 @@ tests/auth.setup.ts                 signs in once and saves the session
 .github/prompts/                    the saved request that regenerates everything
 .claude/                            the same Skills, agents and request for Claude Code
 .github/workflows/playwright.yml    GitHub Actions workflow
-scripts/demo.mjs                    demo:reset, demo:reset:all, demo:generate, demo:restore
+scripts/demo.mjs                    demo:reset:all, demo:generate, demo:restore
 DEMO-SCRIPT.md                      run sheet and a one-sentence tour of every file
 ```
 
@@ -118,7 +118,6 @@ npm run check
 
 | Command | What it does |
 | --- | --- |
-| `npm run demo:reset` | Deletes the plan and the three tests |
 | `npm run demo:reset:all` | Deletes all the test code: framework, page objects, tests, plan and config. Keeps `tests/case-more.spec.ts` and `tests/generated/`, which the generate step does not write |
 | `/generate-case-tests` in your AI assistant | Puts the framework back from the Skill's kit, then the planner, generator and healer write the plan and tests |
 | `npm run demo:restore` | Puts the committed versions back |
