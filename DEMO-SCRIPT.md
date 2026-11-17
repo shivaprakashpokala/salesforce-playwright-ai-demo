@@ -1,49 +1,76 @@
-# Demo run sheet: Salesforce Case flow (about 10 minutes)
+# Demo run sheet: delete the tests, regenerate them, run them (about 12 minutes)
 
-Before you start: `.env` filled in with the JWT settings (see README, "Signing in"),
-the private key at `.auth/server.key`, and one successful `npm test` on this machine. Open VS Code on this folder with the AI chat in agent
-mode (or Claude Code in a terminal here).
+The point of the demo: the plan and the test script are deleted in front of the
+audience, an AI agent writes them again using our Skills, the Playwright MCP server
+and the Playwright agents, and the new tests pass against Salesforce.
 
-**Fallback:** everything below has already been done once and saved in this repo: the
-plan in `specs/`, the generated test in `tests/generated/`, the suite in `tests/`.
-If a live step stalls, show the saved file.
+## The three scenarios
 
-## Step 1 - Playwright MCP server: see the page (2 min)
+1. Create a case with its key details
+2. Do not save a case without a Case Origin
+3. Escalate a case from its record page
 
-Show `.vscode/mcp.json`. Then ask:
+## Before the session
 
-> Open the Cases list in Salesforce, select New, and tell me what fields are on the
-> New Case form, grouped by section.
+- `.env` filled in and the private key at `.auth/server.key` (see README, "Signing in").
+- One full rehearsal of everything below, the night before and again 30 minutes before.
+- Open: this folder in VS Code (or a terminal with Claude Code), and Salesforce in a browser tab.
 
-Point out: the browser opens by itself, already signed in; the answer lists the four
-sections and their fields, read from the page snapshot.
+## Step 1 - Show where we start (1 min)
 
-## Step 2 - Skills: the business context (1 min)
+```bash
+npm test
+```
 
-Open `.github/skills/case-domain/SKILL.md`. One page of plain English: what a case is,
-the rules, what matters most. Then `.github/skills/write-salesforce-test/SKILL.md`: how
-we write Salesforce tests, including the three lessons the first run taught us.
+Eight tests pass. Open `tests/case-lifecycle.spec.ts` and `specs/case-lifecycle-plan.md`
+briefly: "this is what we are about to throw away".
 
-## Step 3 - Planner: write the plan (2 min)
+## Step 2 - Delete them (30 sec)
 
-Pick the **playwright-test-planner** agent:
+```bash
+npm run demo:reset
+```
 
-> Plan tests for creating and working a Case. Use the case-domain skill for the
-> business rules. Save the plan in specs/.
+Show the two files are gone in the file explorer.
 
-Compare with `specs/case-lifecycle-plan.md`. Point at "Do not save a case without a
-Case Origin": that rule came from the business context.
+## Step 3 - Show what the AI will be given (2 min)
 
-## Step 4 - Generator: write a test (2 min)
+- `.github/skills/case-domain/SKILL.md`: the business context. One page, plain English.
+- `.github/skills/write-salesforce-test/SKILL.md`: how we write Salesforce tests.
+- `.vscode/mcp.json`: the Playwright MCP servers, a few lines.
+- `.github/agents/`: planner, generator, healer.
+- `prompts/generate-case-tests.md`: the request itself. Read the three scenarios aloud.
 
-Pick the **playwright-test-generator** agent:
+## Step 4 - Regenerate (5 to 8 min)
 
-> Generate the test "New case defaults to Status New and Priority Medium" from
-> specs/case-lifecycle-plan.md. Follow the write-salesforce-test skill.
+In the AI chat (VS Code Copilot agent mode, or Claude Code), run the saved prompt:
 
-Compare with `tests/generated/new-case-defaults.spec.ts`. Each plan step is a comment.
+> /generate-case-tests
 
-## Step 5 - Run the suite (2 min)
+Or, with the Claude Code command line installed, from a terminal:
+
+```bash
+npm run demo:generate
+```
+
+While it works, narrate what scrolls past:
+
+- It reads the `case-domain` skill first (business rules).
+- **Planner:** a browser opens on Salesforce, already signed in; it reads the New Case
+  form as a snapshot and saves `specs/case-lifecycle-plan.md`.
+- **Generator:** it writes `tests/case-lifecycle.spec.ts`, reusing our page objects.
+- **Healer:** it runs the tests and fixes anything that fails.
+
+This is the slowest step. Keep talking; do not fill the silence by typing.
+
+## Step 5 - Read what it wrote (2 min)
+
+- Open the new `specs/case-lifecycle-plan.md`. Find "Do not save a case without a
+  Case Origin": that rule came from the skill, not from the page.
+- Open the new `tests/case-lifecycle.spec.ts`. Point at label-based locators, the page
+  objects, and the double check (screen and API). All from the skill.
+
+## Step 6 - Run it (1 min)
 
 ```bash
 npm test
@@ -53,13 +80,17 @@ npm test
 npm run report
 ```
 
-Eight tests, about 40 seconds. Open the report and one trace.
+## If the live generation stalls
 
-## Step 6 - Healer: fix a break (optional, 2 min)
+```bash
+npm run demo:restore
+```
 
-In `tests/pages/case-form.page.ts`, change `'Save'` to `'Submit'` in `saveButton` to
-simulate a renamed button, run `npm test`, then pick the **playwright-test-healer** agent:
+That puts back the committed plan and tests (written the same way, earlier). Say so
+plainly, then continue from Step 5.
 
-> Run the tests and fix the failures.
+## Optional: the contrast
 
-Point out: it finds the real button name on the page and repairs the page object.
+Before Step 4, ask a plain chat assistant with no Skills and no MCP server: "Write a
+Playwright test that creates a Salesforce case." It will guess the element names. Show
+it, do not run it, and move on.

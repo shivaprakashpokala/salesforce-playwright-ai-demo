@@ -1,0 +1,11 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright test:*)",
+      "Bash(npm run check:*)",
+      "mcp__playwright-test",
+      "mcp__playwright"
+    ]
+  }
+}

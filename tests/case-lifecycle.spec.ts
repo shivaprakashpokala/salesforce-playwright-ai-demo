@@ -38,15 +38,6 @@ test.describe('Case lifecycle', () => {
     expect(await api.casesWithSubject(subject)).toHaveLength(0);
   });
 
-  test('does not save a case when the form is cancelled', async ({ caseForm, subject, api }) => {
-    await caseForm.open();
-    await caseForm.fill({ subject, caseOrigin: 'Email' });
-    await caseForm.cancel();
-
-    await expect(caseForm.heading).toBeHidden();
-    expect(await api.casesWithSubject(subject)).toHaveLength(0);
-  });
-
   test('escalates a case from its record page', async ({ caseRecord, subject, api }) => {
     const caseId = await api.createCase({ Subject: subject, Origin: 'Web', Priority: 'High' });
     await caseRecord.open(caseId);
@@ -57,16 +48,5 @@ test.describe('Case lifecycle', () => {
     await expect(caseRecord.field('Status')).toContainText('Escalated');
     const [saved] = await api.casesWithSubject(subject);
     expect(saved.Status).toBe('Escalated');
-  });
-
-  test('deletes a case', async ({ caseRecord, subject, api }) => {
-    const caseId = await api.createCase({ Subject: subject, Origin: 'Phone' });
-    await caseRecord.open(caseId);
-    await expect(caseRecord.heading(subject)).toBeVisible();
-
-    await caseRecord.delete();
-
-    await expect(caseRecord.deletedMessage).toBeVisible();
-    expect(await api.casesWithSubject(subject)).toHaveLength(0);
   });
 });

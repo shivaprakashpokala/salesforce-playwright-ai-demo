@@ -27,7 +27,10 @@ Every test creates its own case (subject starts with "PW Demo") and deletes it a
 
 ```
 specs/case-lifecycle-plan.md        the planner's test plan, in plain English
-tests/case-lifecycle.spec.ts        the main suite
+tests/case-lifecycle.spec.ts        the three demo scenarios (deleted and regenerated in the demo)
+tests/case-more.spec.ts             two more scenarios
+prompts/generate-case-tests.md      the request that regenerates the plan and the tests
+scripts/demo.mjs                    demo:reset, demo:generate, demo:restore
 tests/generated/                    a test written by the generator from the plan
 tests/pages/                        page objects: New Case form, Case record page
 tests/support/lightning.ts          reliable picklist helper for Lightning
@@ -107,6 +110,18 @@ npm run check
 ```
 
 `npm run check` runs the conventions script from the `write-salesforce-test` skill.
+
+## Live demo: delete and regenerate
+
+```bash
+npm run demo:reset
+```
+
+deletes the plan and `tests/case-lifecycle.spec.ts`. Then run the saved prompt
+`/generate-case-tests` in your AI assistant (or `npm run demo:generate` with the Claude
+Code command line installed) to have the planner, generator and healer write them
+again. `npm run demo:restore` puts the committed versions back. `DEMO-SCRIPT.md` has
+the full run sheet.
 
 ## GitHub Actions
 
