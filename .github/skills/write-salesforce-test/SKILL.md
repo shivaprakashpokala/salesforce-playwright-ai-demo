@@ -34,7 +34,8 @@ Follow these steps in order. Do not skip the last one.
 ## 5. Test data
 - Import `test` from `tests/fixtures.ts`. Use the `subject` fixture for a unique name;
   anything created with it is deleted after the test.
-- Set up data that is not the point of the test through the `api` fixture, not the UI.
+- Set up data that is not the point of the test through the `api` fixture (jsforce), not the UI.
+- Never sign in inside a test. `tests/auth.setup.ts` signs in once with JWT and every test reuses it.
 - After a save, check the result twice: on the screen and through `api`.
 - Never rely on records that already exist in the org.
 

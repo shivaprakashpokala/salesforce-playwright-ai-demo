@@ -31,7 +31,8 @@ tests/case-lifecycle.spec.ts        the main suite
 tests/generated/                    a test written by the generator from the plan
 tests/pages/                        page objects: New Case form, Case record page
 tests/support/lightning.ts          reliable picklist helper for Lightning
-tests/support/salesforce-api.ts     checks saved data and cleans up
+tests/support/salesforce-auth.ts    JWT sign-in with jsforce, and the front door link
+tests/support/salesforce-api.ts     checks saved data and cleans up (jsforce)
 tests/auth.setup.ts                 signs in once and saves the session
 tests/seed.spec.ts                  starting point for the agents
 .github/skills/                     Skills: case-domain, write-salesforce-test, write-test-cases, write-bug-report
@@ -52,8 +53,44 @@ npm install
 npx playwright install chromium
 ```
 
-Copy `.env.example` to `.env` and fill in your org's login URL, username and password.
-`.env` and the saved session in `.auth/` are git-ignored. Never commit them.
+Copy `.env.example` to `.env` and fill it in (see "Signing in" below). `.env` and
+everything in `.auth/` are git-ignored. Never commit them or the private key.
+
+## Signing in
+
+The tests sign in with the **OAuth 2.0 JWT bearer flow**, so there is no password,
+no emailed verification code and no MFA prompt, on a laptop or in CI.
+
+1. `tests/support/salesforce-auth.ts` signs a three-minute JWT with your private key.
+2. [jsforce](https://jsforce.github.io/) swaps it for an access token and gives us an API connection.
+3. The same connection asks Salesforce for a one-time **front door** link
+   (`/services/oauth2/singleaccess`, falling back to `/secur/frontdoor.jsp?sid=`),
+   and the browser opens that link already signed in.
+4. The browser session is saved to `.auth/state.json` and the API session to
+   `.auth/session.json`; every test reuses both.
+
+What the Salesforce app needs (External Client App or Connected App):
+
+- JWT bearer flow enabled, with the certificate that matches your private key uploaded.
+- OAuth scopes **api** (Manage user data via APIs) and **web** (Manage user data via Web
+  browsers). Without `web`, the API works but the front door link lands on the login page.
+- The test user pre-authorised (profile or permission set added to the app).
+
+In `.env`:
+
+```
+SF_LOGIN_URL=https://your-domain.develop.my.salesforce.com
+SF_USERNAME=you@example.com
+SF_CLIENT_ID=<consumer key>
+SF_PRIVATE_KEY_PATH=.auth/server.key
+```
+
+Put the private key file at `.auth/server.key` (that folder is git-ignored). The
+client secret is not used by this flow. For a sandbox add
+`SF_JWT_AUDIENCE=https://test.salesforce.com`.
+
+If `SF_CLIENT_ID` is not set, the setup falls back to username and password through
+the login page, which Salesforce may stop with a verification code.
 
 ## Run
 
@@ -71,24 +108,11 @@ npm run check
 
 `npm run check` runs the conventions script from the `write-salesforce-test` skill.
 
-### If Salesforce asks for a verification code
-
-Salesforce emails a code the first time it sees a new browser. Sign in once by hand
-and let Playwright save the session:
-
-```bash
-npx playwright codegen --save-storage=.auth/state.json https://your-domain.develop.my.salesforce.com
-```
-
-Log in, enter the code, close the browser. The tests reuse that session from then on.
-
 ## GitHub Actions
 
-The workflow runs on demand (Actions tab, **Run workflow**). It needs repository
-secrets `SF_LOGIN_URL`, `SF_USERNAME` and `SF_PASSWORD`. A fresh GitHub runner is a
-machine Salesforce has not seen before, so it will ask for a verification code unless
-you either add the optional `SF_STORAGE_STATE` secret (the base64 of your
-`.auth/state.json`) or relax Login IP Ranges on the user's profile in a throwaway org.
+The workflow runs on demand (Actions tab, **Run workflow**). It uses the same JWT
+sign-in and needs four repository secrets: `SF_LOGIN_URL`, `SF_USERNAME`,
+`SF_CLIENT_ID` and `SF_PRIVATE_KEY` (paste the whole key file as the secret value).
 
 ## How this was built
 

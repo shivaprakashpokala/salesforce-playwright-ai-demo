@@ -12,8 +12,8 @@ interface Fixtures {
 }
 
 export const test = base.extend<Fixtures>({
-  api: async ({ context }, use) => {
-    await use(await SalesforceApi.from(context));
+  api: async ({}, use) => {
+    await use(SalesforceApi.fromSavedSession());
   },
   subject: async ({ api }, use, testInfo) => {
     const subject = `PW Demo ${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;

@@ -1,9 +1,12 @@
 name: Salesforce Playwright tests
 
 # Runs on demand from the Actions tab (Run workflow).
-# Needs three repository secrets: SF_LOGIN_URL, SF_USERNAME, SF_PASSWORD.
-# Optional: SF_STORAGE_STATE, the base64 of a saved .auth/state.json, so Salesforce
-# recognises the browser and does not ask for an emailed verification code.
+# Signs in with the JWT bearer flow, so no password and no verification code.
+# Needs four repository secrets:
+#   SF_LOGIN_URL    the org's My Domain login URL
+#   SF_USERNAME     the user the tests run as
+#   SF_CLIENT_ID    consumer key of the External Client App
+#   SF_PRIVATE_KEY  the private key (paste the whole PEM file)
 on:
   workflow_dispatch:
 
@@ -30,20 +33,12 @@ jobs:
       - name: Check team conventions
         run: npm run check
 
-      - name: Restore saved Salesforce session (optional)
-        env:
-          SF_STORAGE_STATE: ${{ secrets.SF_STORAGE_STATE }}
-        run: |
-          if [ -n "$SF_STORAGE_STATE" ]; then
-            mkdir -p .auth
-            echo "$SF_STORAGE_STATE" | base64 -d > .auth/state.json
-          fi
-
       - name: Run Playwright tests
         env:
           SF_LOGIN_URL: ${{ secrets.SF_LOGIN_URL }}
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
-          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
         run: npx playwright test
 
       - name: Upload HTML report

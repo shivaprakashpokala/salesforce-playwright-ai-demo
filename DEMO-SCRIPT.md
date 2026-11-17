@@ -1,7 +1,7 @@
 # Demo run sheet: Salesforce Case flow (about 10 minutes)
 
-Before you start: `.env` filled in, and one successful `npm test` on this machine so
-the Salesforce session is saved. Open VS Code on this folder with the AI chat in agent
+Before you start: `.env` filled in with the JWT settings (see README, "Signing in"),
+the private key at `.auth/server.key`, and one successful `npm test` on this machine. Open VS Code on this folder with the AI chat in agent
 mode (or Claude Code in a terminal here).
 
 **Fallback:** everything below has already been done once and saved in this repo: the
