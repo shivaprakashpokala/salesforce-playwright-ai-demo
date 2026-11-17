@@ -4,3 +4,7 @@ playwright-report/
 .playwright-mcp/
 .auth/
 .env
+
+# Salesforce CLI / extension caches (org metadata, never commit)
+.sf/
+.sfdx/
