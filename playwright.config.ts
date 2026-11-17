@@ -17,11 +17,11 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: lightningUrl,
-    viewport: { width: 1440, height: 900 },
+    viewport: { width: 1920, height: 1080 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     // Every test gets a recording, shown on its page in the HTML report.
-    video: { mode: 'on', size: { width: 1440, height: 900 } },
+    video: { mode: 'on', size: { width: 1920, height: 1080 } },
     proxy,
     launchOptions: executablePath ? { executablePath } : {},
   },
@@ -32,7 +32,7 @@ export default defineConfig({
       name: 'chromium',
       testIgnore: /auth\.setup\.ts/,
       dependencies: ['setup'],
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, storageState: '.auth/state.json' },
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 }, storageState: '.auth/state.json' },
     },
   ],
 });
