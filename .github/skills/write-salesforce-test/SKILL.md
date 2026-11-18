@@ -38,6 +38,9 @@ these files from scratch, and never overwrite ones that exist.
   Lightning re-renders while loading and can close a dropdown just after it opens.
 - A field on a record page is found through its "Edit <label>" button (see `CaseRecordPage.field`).
 - When an error dialog is open, the form behind it is hidden. Close the dialog before checking the form.
+- A record page URL may or may not include the object name: after a save Lightning can open
+  `/lightning/r/<Id>/view` instead of `/lightning/r/Case/<Id>/view`. Match the URL by record Id,
+  with the object name optional (`/lightning/r/(Case/)?<Id>/view`).
 - Never use fixed waits. Use web-first assertions; Salesforce is slow, the timeouts in
   `playwright.config.ts` already allow for it.
 
